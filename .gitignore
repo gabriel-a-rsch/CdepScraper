@@ -1,0 +1,6 @@
+/cdep_scraping/data.db
+# ignore all idea settings
+.idea/*
+*.iws
+*.iml
+*.ipr
