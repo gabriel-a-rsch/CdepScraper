@@ -1,12 +1,34 @@
+from datetime import datetime
+
 from cdep_scraping import cdepParsing
 from cdep_scraping.PLXBasicData import PLXBasicData
 from cdep_scraping.PLXFullDataWrapper import PLXFullDataWrapper
-
+import json
 import sqlite3
 from typing import Optional
 
 
 class PLXRepository:
+    @staticmethod
+    def plx_serializer(obj):
+        if isinstance(obj,PLXFullDataWrapper):
+            return {"basic_data":obj.basicData } #incomplete serialization TODO: Add complete serialization
+        elif isinstance(obj,PLXBasicData):
+            return {"plx_number":obj.PLXNumber,
+                    "bill_name":obj.BillName,
+                    "bpi_number":obj.BPINumber,
+                    "senate_number":obj.SenateNumber,
+                    "gov_number":obj.GovNumber,
+                    "decisional_chamber":obj.DecisionalChamber,
+                    "is_emergency_procedure":obj.IsUrgentProcedure,
+                    "initiator":obj.Initiator,
+                    "character":obj.Character,
+                    "initiative_type":obj.InitiativeType,
+                    "current_stage":obj.CurrentStage,
+                    "legislative_procedure":obj.LegislativeProcedure,
+                    }
+        else:
+            raise TypeError(f'Cannot serialize object of {type(obj)}')
     def __init__(self, dbPath:str='data.db'):
         self.plxList: list[PLXFullDataWrapper] = []
         self.db_path: str = dbPath  # SQLite3 db path
@@ -16,6 +38,22 @@ class PLXRepository:
         fullWrapperToAdd:PLXFullDataWrapper = PLXFullDataWrapper(myBasicData,[],[])
         self.plxList.append(fullWrapperToAdd)
 
+    def exportToJSONStrFlat(self)->str:
+        raise NotImplementedError
+    def exportToJSONFileFlat(self)->str:
+        raise NotImplementedError
+        pass
+    def exportToJSONStr(self)->str:
+        return json.dumps(self.plxList, default=self.plx_serializer)
+        pass
+    def exportToJSONFile(self,filePath:str="")->str:
+        now = datetime.now()
+        currentFilePath=filePath
+        if filePath=="":
+            currentFilePath="CDEPJSONExport"+now.strftime("%m-%d-%Y-%H-%M-%S")+".json"
+        jsonStr:str = self.exportToJSONStr()
+        with open(currentFilePath,"w") as f:
+            f.write(jsonStr)
     def init_sqlite_db(self) -> None:
         """Initialize SQLite database with proper schema for PLXFullDataWrapper data"""
         conn = sqlite3.connect(self.db_path)
