@@ -1,3 +1,5 @@
+from cdep_scraping import cdepParsing
+from cdep_scraping.PLXBasicData import PLXBasicData
 from cdep_scraping.PLXFullDataWrapper import PLXFullDataWrapper
 
 import sqlite3
@@ -5,9 +7,14 @@ from typing import Optional
 
 
 class PLXRepository:
-    def __init__(self):
+    def __init__(self, dbPath:str='data.db'):
         self.plxList: list[PLXFullDataWrapper] = []
-        self.db_path: str = 'data.db'  # SQLite3 db path
+        self.db_path: str = dbPath  # SQLite3 db path
+
+    def addPLXFromHTMLString(self,htmlString:str):
+        myBasicData:PLXBasicData = cdepParsing.plxMainTextToBasicData(htmlString)
+        fullWrapperToAdd:PLXFullDataWrapper = PLXFullDataWrapper(myBasicData,[],[])
+        self.plxList.append(fullWrapperToAdd)
 
     def init_sqlite_db(self) -> None:
         """Initialize SQLite database with proper schema for PLXFullDataWrapper data"""
