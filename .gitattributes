@@ -1,1 +1,3 @@
 *.html linguist-generated
+* linguist-vendored
+*.py linguist-vendored=false
