@@ -1,3 +1,5 @@
+from cdep_scraping.LegislativeProcedureStageInstance import LegislativeProcedureStageInstance
+from cdep_scraping.cdepParsing import plxMainTextToLegislativeProcedureList
 from context import cdep_scraping
 def test_cdepscraperPLXBasicData():
     file_path:str = 'samplePLXDetails.htm'
@@ -31,4 +33,18 @@ def test_cdepscraperPLXBasicData():
     assert plxBasicData.CurrentStage == magicCurrentStage
     assert plxBasicData.Initiator == magicInitiator
 
-test_cdepscraperPLXBasicData()
+def test_cdepscraperLegislativeHistory():
+    file_path: str = 'samplePLXTable.htm'
+    with open(file_path, 'r', encoding="ISO-8859-2") as file:
+        file_content = file.read()
+    testList:list[LegislativeProcedureStageInstance]= plxMainTextToLegislativeProcedureList(file_content)
+    assert len(testList) == 7
+    assert testList[0].identifier=="SE"
+    assert testList[1].identifier=="CD"
+    assert testList[0].date == "16.12.2024"
+    assert testList[1].date == "03.02.2025"
+    assert "prezentare în Biroul Permanent al Camerei Deputatilor" in testList[1].content
+    assert "proiectul de lege" in testList[0].content
+
+
+test_cdepscraperLegislativeHistory()

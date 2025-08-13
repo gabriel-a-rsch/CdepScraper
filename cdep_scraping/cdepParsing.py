@@ -2,6 +2,7 @@ from typing import Any
 
 from bs4 import BeautifulSoup
 from bs4 import NavigableString
+import re
 
 from cdep_scraping.LegislativeProcedureStageInstance import LegislativeProcedureStageInstance
 from cdep_scraping.PLXBasicData import PLXBasicData
@@ -20,9 +21,45 @@ def parseTable(table)->list[Any]:
         data.append([ele for ele in cols if ele])  # Get rid of empty values
     return data
 
+def parseLegislativeHistoryTableList(rawTableList:list[Any])->list[LegislativeProcedureStageInstance]:
+    pass1 = [b for b in rawTableList if b] #remove empty entries
+    pass2 = []
+    currentMultiLenArray = pass1[0]
+    pass2.append(currentMultiLenArray)
+    for i in range(len(pass1)):
+        if pass1[i][0] in currentMultiLenArray:
+            continue
+        else:
+            currentMultiLenArray=pass1[i]
+            pass2.append(currentMultiLenArray)
+    #after pass 2 all duplicate entries are removed
+    currentlyRelevantDate:str = ""
+    currentIdentifier:str = ""
+    pattern = re.compile(r"\d{2}(\.|-)\d{2}(\.|-)\d{4}")
+    pass3:list[LegislativeProcedureStageInstance] = []
+    for i in range(len(pass2)):
+        firstStr = pass2[i][0]
+        if len(firstStr)==2:
+            currentIdentifier=firstStr
+            continue
+        if pattern.match(firstStr):
+            currentlyRelevantDate=firstStr
+        eventToDocumentStr = "\n".join(pass2[i][1:])
+        auxLegInstance:LegislativeProcedureStageInstance = LegislativeProcedureStageInstance(currentlyRelevantDate,eventToDocumentStr,currentIdentifier) # ISSUE: this doesn't capture attachments
+        pass3.append(auxLegInstance)
+    pass3.pop(0)
+    finalList = pass3
+    return finalList
+
+
 def plxMainTextToLegislativeProcedureList(htmlText:str)->list[LegislativeProcedureStageInstance]:
-    raise NotImplementedError
-    pass
+    soup = BeautifulSoup(htmlText,"html.parser")
+    mainDiv=soup.find("div",{"id":"content"})
+    mainTable=mainDiv.find("table",{"width":"100%", "border":"0", "cellspacing":"0", "cellpadding":"0"})
+    myList = parseTable(mainTable)
+    finalList = parseLegislativeHistoryTableList(myList)
+    return finalList
+
 
 def plxMainTextToBasicData(htmlText:str)->PLXBasicData:
     # div class detalii-initiativa
