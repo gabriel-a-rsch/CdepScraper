@@ -2,6 +2,7 @@ from datetime import datetime
 
 from cdep_scraping import cdepParsing
 from cdep_scraping.LegislativeProcedureStageInstance import LegislativeProcedureStageInstance
+from cdep_scraping.PLXAttachments import PLXAttachment
 from cdep_scraping.PLXBasicData import PLXBasicData
 from cdep_scraping.PLXFullDataWrapper import PLXFullDataWrapper
 import json
@@ -13,7 +14,7 @@ class PLXRepository:
     @staticmethod
     def plx_serializer(obj):
         if isinstance(obj,PLXFullDataWrapper):
-            return {"basic_data":obj.basicData, "procedural_stages":obj.ProceduralStages } #incomplete serialization TODO: Add complete serialization
+            return {"basic_data":obj.basicData, "procedural_stages":obj.ProceduralStages, "consultations": obj.Consultations }
         elif isinstance(obj,PLXBasicData):
             return {"plx_number":obj.PLXNumber,
                     "bill_name":obj.BillName,
@@ -33,6 +34,11 @@ class PLXRepository:
                 "date":obj.date,
                 "identifier":obj.identifier,
                 "content":obj.content
+            }
+        elif isinstance(obj,PLXAttachment):
+            return {
+                "name":obj.name,
+                "url":obj.URLpath
             }
         else:
             raise TypeError(f'Cannot serialize object of {type(obj)}')
