@@ -10,6 +10,8 @@ class PLXBasicData:
         self.Character = "" # regular value is "ordinar"
         self.CurrentStage = "" # many types of values here
         self.Initiator = "" # "Guvern" is a common type here
+        self.DecisionalChamber = "" # Camera Decizionala
+        self.IsUrgentProcedure = "" #
 
 
 
