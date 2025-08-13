@@ -3,6 +3,7 @@ from typing import Any
 from bs4 import BeautifulSoup
 from bs4 import NavigableString
 
+from cdep_scraping.LegislativeProcedureStageInstance import LegislativeProcedureStageInstance
 from cdep_scraping.PLXBasicData import PLXBasicData
 
 def cleanTitleText(titleText):
@@ -18,6 +19,11 @@ def parseTable(table)->list[Any]:
         cols = [ele.text.strip() for ele in cols]
         data.append([ele for ele in cols if ele])  # Get rid of empty values
     return data
+
+def plxMainTextToLegislativeProcedureList(htmlText:str)->list[LegislativeProcedureStageInstance]:
+    raise NotImplementedError
+    pass
+
 def plxMainTextToBasicData(htmlText:str)->PLXBasicData:
     # div class detalii-initiativa
     soup = BeautifulSoup(htmlText, 'html.parser')
