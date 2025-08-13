@@ -48,7 +48,8 @@ class PLXRepository:
 
     def addPLXFromHTMLString(self,htmlString:str):
         myBasicData:PLXBasicData = cdepParsing.plxMainTextToBasicData(htmlString)
-        fullWrapperToAdd:PLXFullDataWrapper = PLXFullDataWrapper(myBasicData,[],[])
+        myBasicHistory:list[LegislativeProcedureStageInstance] = cdepParsing.plxMainTextToLegislativeProcedureList(htmlString)
+        fullWrapperToAdd:PLXFullDataWrapper = PLXFullDataWrapper(myBasicData,[],myBasicHistory)
         self.plxList.append(fullWrapperToAdd)
 
     def exportToJSONStrFlat(self)->str:

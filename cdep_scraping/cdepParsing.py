@@ -7,9 +7,14 @@ import re
 from cdep_scraping.LegislativeProcedureStageInstance import LegislativeProcedureStageInstance
 from cdep_scraping.PLXBasicData import PLXBasicData
 
-def cleanTitleText(titleText):
-    titleText = titleText.replace('\n', '')
-    return titleText
+def cleanTitleText(titleText:str) -> str:
+    titleText = titleText.replace('\n', ' ')
+    titleText2 = ' '.join(titleText.split())
+    return titleText2
+
+def cleanLegislativeHistoryText(historyText:str) -> str:
+    historyText1 = re.sub(r'[\n]+', '\n', historyText)
+    return historyText1
 
 def parseTable(table)->list[Any]:
     data = []
@@ -48,7 +53,11 @@ def parseLegislativeHistoryTableList(rawTableList:list[Any])->list[LegislativePr
         auxLegInstance:LegislativeProcedureStageInstance = LegislativeProcedureStageInstance(currentlyRelevantDate,eventToDocumentStr,currentIdentifier) # ISSUE: this doesn't capture attachments
         pass3.append(auxLegInstance)
     pass3.pop(0)
-    finalList = pass3
+    finalList:list[LegislativeProcedureStageInstance] = []
+    for elem in pass3:
+        newContent = cleanLegislativeHistoryText(elem.content)
+        auxElem = LegislativeProcedureStageInstance(elem.date, newContent, elem.identifier, elem.attachments)
+        finalList.append(auxElem)
     return finalList
 
 
@@ -70,7 +79,6 @@ def plxMainTextToBasicData(htmlText:str)->PLXBasicData:
     cleanedTitleText = cleanTitleText(titleText)
     mainTable = mainDiv.find("table")
     data = parseTable(mainTable)
-    print(data)
     dummyData:PLXBasicData = PLXBasicData()
     dummyData.BillName = cleanedTitleText
     dictionaryOfTableValues = {lst[0]: lst[1:] for lst in data}
